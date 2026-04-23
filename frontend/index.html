@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Estoque</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>Sistema Estoque</h2>
+            <form id="form-login">
+                <div class="linha-form">
+                    <label>E-mail</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="linha-form">
+                    <label>Senha</label>
+                    <input type="password" id="senha" required>
+                </div>
+                <button type="submit" class="btn btn-azul" style="width: 100%; margin-top: 10px;">Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="dashboard-screen">
+        
+        <div class="sidebar fechada" id="menu-lateral">
+            <div class="sidebar-header">
+                <h3>Meu Estoque</h3>
+            </div>
+            <div class="sidebar-menu">
+                <div class="menu-item ativo" id="btn-nav-produtos" onclick="mudarTela('tela-produtos')">
+                    Produtos
+                </div>
+                <div class="menu-item" id="btn-nav-mov" onclick="mudarTela('tela-movimentacoes')">
+                    Movimentações
+                </div>
+            </div>
+            <div class="sidebar-footer">
+                <button class="btn btn-vermelho" style="width: 100%;" onclick="sair()">Sair</button>
+            </div>
+        </div>
+
+        <div class="conteudo">
+            <div class="topbar">
+                <button class="btn-menu" id="icone-menu" onclick="abrirFecharMenu()">☰</button>
+                <span>Usuario Logado</span>
+            </div>
+
+            <div class="area-telas">
+                
+                <div id="tela-produtos">
+                    <div class="cabecalho-pagina">
+                        <h2>Produtos</h2>
+                        <p>Lista de produtos cadastrados</p>
+                    </div>
+                    
+                    <div class="barra-acoes">
+                        <input type="text" class="busca" placeholder="Buscar...">
+                        <button class="btn btn-azul" onclick="abrirModalProduto('novo')">Novo Produto</button>
+                    </div>
+
+                    <div class="box-tabela">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Preço</th>
+                                    <th>Qtd Atual</th>
+                                    <th>Mínimo</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lista-produtos"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="tela-movimentacoes" style="display: none;">
+                    <div class="cabecalho-pagina">
+                        <h2>Movimentações</h2>
+                        <p>Entradas e saídas de itens</p>
+                    </div>
+
+                    <div id="box-alerta" class="aviso-box" style="display: none;">
+                        <h4>Atenção! Estoque Baixo</h4>
+                        <div id="texto-alerta"></div>
+                    </div>
+                    
+                    <div class="barra-acoes">
+                        <span></span>
+                        <button class="btn btn-azul" onclick="abrirModalMov()">Registrar Movimento</button>
+                    </div>
+
+                    <div class="duas-colunas">
+                        
+                        <div class="box-tabela">
+                            <h3>Situação do Estoque</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Produto</th>
+                                        <th>Qtd</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lista-status"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="box-tabela">
+                            <h3>Últimos Registros</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Produto</th>
+                                        <th>Tipo</th>
+                                        <th>Qtd</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lista-historico"></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="janela-produto" class="modal-fundo">
+        <div class="modal-caixa">
+            <div class="modal-topo">
+                <h3 id="titulo-modal-prod">Produto</h3>
+                <button class="btn-fechar" onclick="fecharModal('janela-produto')">X</button>
+            </div>
+            <form id="form-produto">
+                <input type="hidden" id="id-prod">
+                <div class="linha-form">
+                    <label>Nome</label>
+                    <input type="text" id="nome-prod" required>
+                </div>
+                <div class="linha-form">
+                    <label>Descrição</label>
+                    <textarea id="desc-prod" rows="2"></textarea>
+                </div>
+                <div class="linha-form grid-form">
+                    <div>
+                        <label>Preço</label>
+                        <input type="number" id="preco-prod" step="0.01" required>
+                    </div>
+                    <div>
+                        <label>Estoque Inicial</label>
+                        <input type="number" id="qtd-prod" required>
+                    </div>
+                    <div>
+                        <label>Mínimo</label>
+                        <input type="number" id="min-prod">
+                    </div>
+                </div>
+                <div class="modal-rodape">
+                    <button type="button" class="btn btn-cinza" onclick="fecharModal('janela-produto')">Cancelar</button>
+                    <button type="submit" class="btn btn-verde">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="janela-mov" class="modal-fundo">
+        <div class="modal-caixa">
+            <div class="modal-topo">
+                <h3>Movimentar Estoque</h3>
+                <button class="btn-fechar" onclick="fecharModal('janela-mov')">X</button>
+            </div>
+            <form id="form-mov">
+                <div class="linha-form">
+                    <label>Produto</label>
+                    <select id="sel-produto" required></select>
+                </div>
+                <div class="linha-form">
+                    <label>Operação</label>
+                    <select id="tipo-mov" required>
+                        <option value="Entrada">Entrada</option>
+                        <option value="Saida">Saída</option>
+                    </select>
+                </div>
+                <div class="linha-form grid-form" style="grid-template-columns: 1fr 1fr;">
+                    <div>
+                        <label>Qtd</label>
+                        <input type="number" id="qtd-mov" min="1" required>
+                    </div>
+                    <div>
+                        <label>Data</label>
+                        <input type="date" id="data-mov" required>
+                    </div>
+                </div>
+                <div class="modal-rodape">
+                    <button type="button" class="btn btn-cinza" onclick="fecharModal('janela-mov')">Cancelar</button>
+                    <button type="submit" class="btn btn-verde">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000/api';
+        let dadosProdutos = [];
+
+        // clique fora do menu para fechar
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('menu-lateral');
+            const botao = document.getElementById('icone-menu');
+            
+            if (!menu.contains(e.target) && !botao.contains(e.target) && !menu.classList.contains('fechada')) {
+                menu.classList.add('fechada');
+            }
+        });
+
+        // funcoes login
+        document.getElementById('form-login').onsubmit = async function(e) {
+            e.preventDefault();
+            let email = document.getElementById('email').value;
+            let senha = document.getElementById('senha').value;
+            
+            try {
+                let req = await fetch(API + '/login', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({email, senha}) 
+                });
+                let res = await req.json();
+                
+                if (res.success) {
+                    document.getElementById('login-screen').style.display = 'none';
+                    document.getElementById('dashboard-screen').style.display = 'flex';
+                    mudarTela('tela-produtos');
+                } else {
+                    alert('Login falhou');
+                }
+            } catch (err) { 
+                alert('Erro na api. Node ta rodando?'); 
+            }
+        };
+
+        function sair() {
+            document.getElementById('dashboard-screen').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('form-login').reset();
+        }
+
+        // controle tela
+        function abrirFecharMenu() {
+            document.getElementById('menu-lateral').classList.toggle('fechada');
+        }
+
+        function mudarTela(idTela) {
+            document.getElementById('tela-produtos').style.display = 'none';
+            document.getElementById('tela-movimentacoes').style.display = 'none';
+            document.getElementById(idTela).style.display = 'block';
+
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('ativo'));
+            
+            if(idTela == 'tela-produtos') {
+                document.getElementById('btn-nav-produtos').classList.add('ativo');
+                carregarProdutos();
+            } else {
+                document.getElementById('btn-nav-mov').classList.add('ativo');
+                carregarMovimentacoes();
+            }
+        }
+
+        function formatarDinheiro(val) {
+            return Number(val).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        // tabelas
+        async function carregarProdutos() {
+            let req = await fetch(API + '/produtos');
+            dadosProdutos = await req.json();
+            
+            let html = '';
+            for(let p of dadosProdutos) {
+                let cor = p.quantidade <= p.estoque_minimo ? 'color: red;' : '';
+                html += `
+                    <tr>
+                        <td>${p.id}</td>
+                        <td>${p.nome}</td>
+                        <td>${formatarDinheiro(p.preco)}</td>
+                        <td style="${cor} font-weight: bold;">${p.quantidade}</td>
+                        <td>${p.estoque_minimo}</td>
+                        <td>
+                            <button class="btn btn-amarelo" onclick="abrirModalProduto('editar', ${p.id})">Editar</button>
+                            <button class="btn btn-vermelho" onclick="apagarProduto(${p.id})">Excluir</button>
+                        </td>
+                    </tr>`;
+            }
+            document.getElementById('lista-produtos').innerHTML = html;
+        }
+
+        async function carregarMovimentacoes() {
+            // carregar status atual
+            let reqProd = await fetch(API + '/produtos');
+            dadosProdutos = await reqProd.json();
+            
+            let htmlStatus = '';
+            let htmlAlerta = '';
+            let mostraAlerta = false;
+
+            for(let p of dadosProdutos) {
+                let taBaixo = p.quantidade <= p.estoque_minimo;
+                let badge = taBaixo ? '<span class="status status-alerta">Baixo</span>' : '<span class="status status-ok">OK</span>';
+                
+                htmlStatus += `
+                    <tr>
+                        <td>${p.nome}</td>
+                        <td>${p.quantidade}</td>
+                        <td>${badge}</td>
+                    </tr>`;
+
+                if (taBaixo) {
+                    mostraAlerta = true;
+                    htmlAlerta += `<p>- ${p.nome} (Qtd: ${p.quantidade} / Min: ${p.estoque_minimo})</p>`;
+                }
+            }
+            
+            document.getElementById('lista-status').innerHTML = htmlStatus;
+            document.getElementById('texto-alerta').innerHTML = htmlAlerta;
+            document.getElementById('box-alerta').style.display = mostraAlerta ? 'block' : 'none';
+
+            // carregar ultimos registros
+            let reqMov = await fetch(API + '/movimentacoes');
+            let dadosMov = await reqMov.json();
+            
+            let htmlHist = '';
+            for(let m of dadosMov) {
+                let badge = m.tipo == 'Entrada' ? '<span class="status status-ok">Entrada</span>' : '<span class="status status-erro">Saída</span>';
+                let dataBr = m.data.split('-').reverse().join('/');
+                
+                htmlHist += `
+                    <tr>
+                        <td>${dataBr}</td>
+                        <td>${m.produto_nome}</td>
+                        <td>${badge}</td>
+                        <td>${m.quantidade}</td>
+                    </tr>`;
+            }
+            document.getElementById('lista-historico').innerHTML = htmlHist;
+        }
+
+        // funcoes do modal
+        function fecharModal(id) { 
+            document.getElementById(id).style.display = 'none'; 
+        }
+
+        function abrirModalProduto(acao, id = null) {
+            document.getElementById('form-produto').reset();
+            document.getElementById('id-prod').value = '';
+            document.getElementById('titulo-modal-prod').innerText = acao == 'editar' ? 'Editar' : 'Novo Produto';
+
+            if (acao == 'editar') {
+                let prod = dadosProdutos.find(x => x.id == id);
+                if (prod) {
+                    document.getElementById('id-prod').value = prod.id;
+                    document.getElementById('nome-prod').value = prod.nome;
+                    document.getElementById('desc-prod').value = prod.descricao;
+                    document.getElementById('preco-prod').value = prod.preco;
+                    document.getElementById('qtd-prod').value = prod.quantidade;
+                    document.getElementById('min-prod').value = prod.estoque_minimo;
+                }
+            }
+            document.getElementById('janela-produto').style.display = 'flex';
+        }
+
+        function abrirModalMov() {
+            document.getElementById('form-mov').reset();
+            document.getElementById('data-mov').valueAsDate = new Date();
+            
+            let combo = document.getElementById('sel-produto');
+            combo.innerHTML = '<option value="">Escolha...</option>';
+            for(let p of dadosProdutos) {
+                combo.innerHTML += `<option value="${p.id}">${p.nome} (Qtd: ${p.quantidade})</option>`;
+            }
+
+            document.getElementById('janela-mov').style.display = 'flex';
+        }
+
+        // forms submit
+        document.getElementById('form-produto').onsubmit = async function(e) {
+            e.preventDefault();
+            let id = document.getElementById('id-prod').value;
+            let obj = {
+                nome: document.getElementById('nome-prod').value,
+                descricao: document.getElementById('desc-prod').value,
+                preco: document.getElementById('preco-prod').value,
+                quantidade: document.getElementById('qtd-prod').value,
+                estoque_minimo: document.getElementById('min-prod').value || 0
+            };
+
+            let metodo = id ? 'PUT' : 'POST';
+            let url = id ? API + '/produtos/' + id : API + '/produtos';
+
+            await fetch(url, { method: metodo, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(obj) });
+            fecharModal('janela-produto');
+            carregarProdutos();
+        };
+
+        document.getElementById('form-mov').onsubmit = async function(e) {
+            e.preventDefault();
+            let obj = {
+                produto_id: document.getElementById('sel-produto').value,
+                tipo: document.getElementById('tipo-mov').value,
+                quantidade: document.getElementById('qtd-mov').value,
+                data: document.getElementById('data-mov').value
+            };
+
+            await fetch(API + '/movimentacoes', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(obj)
+            });
+
+            fecharModal('janela-mov');
+            carregarMovimentacoes();
+        };
+
+        async function apagarProduto(id) {
+            if (confirm('Tem certeza que quer apagar esse produto?')) {
+                await fetch(API + '/produtos/' + id, { method: 'DELETE' });
+                carregarProdutos();
+            }
+        }
+    </script>
+</body>
+</html>
